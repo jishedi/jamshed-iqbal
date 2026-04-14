@@ -1,13 +1,79 @@
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Button from '../components/Button';
 import styles from '../styles/home.module.css';
 
+function addDaysToDate(currentDate, daysToAdd) {
+    daysToAdd = daysToAdd || 0
+
+    // Instantiate a new object based on the current Date
+    const futureDate = new Date(currentDate)
+
+    // Adding the number of days
+    futureDate.setDate(futureDate.getDate() + daysToAdd)
+
+    return futureDate.toISOString().split('T')[0];
+}
+
 function TransactionListForm() {
   const transactions = [
-    {transactionId: 1001, purchaseDescription: 'CVS Pharmacy', transactionDate: '04/02/2026', transactionAmount: '21.34'},
-    {transactionId: 1002, purchaseDescription: 'Market Basket', transactionDate: '04/01/2026', transactionAmount: '161.45'},
-    {transactionId: 1003, purchaseDescription: 'Pizza Hut', transactionDate: '03/31/2026', transactionAmount: '35.87'}
+    {transactionId: 1001, purchaseDescription: 'CVS Pharmacy', transactionDate: '2026-04-02', transactionAmount: '2172.34'},
+    {transactionId: 1002, purchaseDescription: 'Market Basket', transactionDate: '2026-04-01', transactionAmount: '161.45'},
+    {transactionId: 1003, purchaseDescription: 'Pizza Hut', transactionDate: '2026-03-31', transactionAmount: '35623.87'}
   ];
+
+  //const transactions = JSON.parse(transactionRecords);
+
+  for (const transaction of transactions) {
+    console.log('Transaction ID' + transaction.transactionId);
+    console.log('Purchase Description' + transaction.purchaseDescription);
+    console.log('Transaction Date' + transaction.transactionDate);
+    console.log('Transaction Amount' + transaction.transactionAmount);
+  }
+
+  const currencyFormatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+
+  useEffect(() => {
+    // Define the async function inside useEffect
+    const fetchData = async () => {
+      const baseUrl = new URL('http://localhost:3000/api/transaction-management/transactions');
+      const params = new URLSearchParams();
+      const transactionRangeDate = addDaysToDate(new Date(), -30);
+
+      params.append('fields', 'record_date,country,currency,country_currency_desc,exchange_rate');
+      params.append('filter', 'country:eq:Euro Zone,record_date:gte:' + `${transactionRangeDate}`);
+      params.append('sort', '-record_date');
+
+      const queryString = new URLSearchParams(params).toString();
+
+      try {
+        const response = await fetch(`${baseUrl}?${queryString}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        console.log(data);
+        setTransactionId(data.data[0].transactionId);
+        setPurchaseDescription(data.data[0].purchaseDescription);
+        setTransactionDate(data.data[0].transactionDate);
+        setTransactionAmount(data.data[0].transactionAmount);
+        const formattedAmount = new Intl.NumberFormat('en-US').format(transactionAmount * data.data[0].exchange_rate);
+        setConvertedAmount(formattedAmount);
+        } catch (error) {
+        console.error('Fetch error:', error);
+      }
+    };
+
+    fetchData();
+
+    // This code runs once on component load
+    console.log("Component loaded!");
+
+    // Optional: return a cleanup function (runs on unmount)
+    return () => console.log("Cleaning up...");
+  }, []); // Empty array ensures it runs only once
 
   // The function passed from a parent component or defined here to handle cancellation
   const handleHome = (event) => {
@@ -45,7 +111,7 @@ function TransactionListForm() {
               <td style={{padding: '10px',  textAlign: 'center'}}>{transaction.transactionId}</td>
               <td style={{padding: '10px',  textAlign: 'left'}}><Link href={`/TransactionView?transactionId=${transaction.transactionId}&purchaseDescription=${transaction.purchaseDescription}&transactionDate=${transaction.transactionDate}&transactionAmount=${transaction.transactionAmount}`}>{transaction.purchaseDescription}</Link></td>
               <td style={{padding: '10px',  textAlign: 'center'}}>{transaction.transactionDate}</td>
-              <td style={{padding: '10px',  textAlign: 'center'}}>${transaction.transactionAmount}</td>
+              <td style={{padding: '10px',  textAlign: 'center'}}>{currencyFormatter.format(transaction.transactionAmount)}</td>
             </tr>
           ))}
           </tbody>
