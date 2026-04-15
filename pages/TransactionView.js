@@ -27,7 +27,7 @@ function PurchaseTransactionViewForm() {
   const transactionDate = searchParams.get("transactionDate");
   const actualTransactionDate = new Date(transactionDate);
   const formattedTransactionDate = actualTransactionDate.toLocaleDateString('en-US');
-  const transactionAmount = searchParams.get("transactionAmount");
+  const purchaseAmount = searchParams.get("purchaseAmount");
   //setCountry(searchParams.get("country"));
   //setCurrency(searchParams.get("currency"));
   //setExchangeRate(searchParams.get("exchangeRate"));
@@ -59,14 +59,14 @@ function PurchaseTransactionViewForm() {
         console.log(data);
         alert('Country: ' + data.data[0].country + '\nCurrency: ' + data.data[0].currency +
             '\nExchange Rate: ' + data.data[0].exchange_rate + '\nExchange Rate Range Date: ' +
-            exchangeRateRangeDate + '\nTransaction Amount: ' + currencyFormatter.format(transactionAmount));
+            exchangeRateRangeDate + '\nPurchase Amount: ' + currencyFormatter.format(purchaseAmount));
         setCountry(data.data[0].country);
         setCurrency(data.data[0].currency);
         setExchangeRate(data.data[0].exchange_rate);
         const recordDate = new Date(data.data[0].record_date);
         const formattedRecordDate = recordDate.toLocaleDateString('en-US');
         setExchangeRateDate(formattedRecordDate);
-        const formattedAmount = new Intl.NumberFormat('en-US').format(transactionAmount * data.data[0].exchange_rate);
+        const formattedAmount = new Intl.NumberFormat('en-US').format(purchaseAmount * data.data[0].exchange_rate);
         setConvertedAmount(formattedAmount);
         } catch (error) {
         console.error('Fetch error:', error);
@@ -105,7 +105,7 @@ function PurchaseTransactionViewForm() {
       </label>
       <br></br>
       <label>
-        <b>Purchase Amount:</b> {currencyFormatter.format(`${transactionAmount}`)}
+        <b>Purchase Amount:</b> {currencyFormatter.format(`${purchaseAmount}`)}
       </label>
       <br></br>
       <label>
