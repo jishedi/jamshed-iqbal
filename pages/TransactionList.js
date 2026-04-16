@@ -16,19 +16,14 @@ function addDaysToDate(currentDate, daysToAdd) {
 }
 
 function TransactionListForm() {
-  const [transactions2, setTransactions2] = useState([]);
-  const transactions = [
-    {transactionId: 1001, purchaseDescription: 'CVS Pharmacy', transactionDate: '2026-04-02', purchaseAmount: '2172.34'},
-    {transactionId: 1002, purchaseDescription: 'Market Basket', transactionDate: '2026-04-01', purchaseAmount: '161.45'},
-    {transactionId: 1003, purchaseDescription: 'Pizza Hut', transactionDate: '2026-03-31', purchaseAmount: '35623.87'}
-  ];
+  const [transactions, setTransactions] = useState([]);
 
-  for (const transaction of transactions) {
-    console.log('Transaction ID: ' + transaction.transactionId);
-    console.log('Purchase Description: ' + transaction.purchaseDescription);
-    console.log('Transaction Date: ' + transaction.transactionDate);
-    console.log('Purchase Amount:' + transaction.purchaseAmount);
-  }
+//  for (const transaction of transactions) {
+//    console.log('Transaction ID: ' + transaction.transactionId);
+//    console.log('Purchase Description: ' + transaction.purchaseDescription);
+//    console.log('Transaction Date: ' + transaction.transactionDate);
+//    console.log('Purchase Amount:' + transaction.purchaseAmount);
+//  }
 
   const currencyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -51,13 +46,13 @@ function TransactionListForm() {
 
         const jsonData = await response.json();
         console.log(jsonData);
-        for (const transaction of transactions2) {
+        setTransactions(jsonData);
+        for (const transaction of transactions) {
             console.log('Transaction ID: ' + transaction.transactionId);
             console.log('Purchase Description: ' + transaction.purchaseDescription);
             console.log('Transaction Date: ' + transaction.transactionDate);
             console.log('Purchase Amount: ' + transaction.purchaseAmount);
         }
-        setTransactions2(jsonData);
         } catch (error) {
         console.error('Fetch error:', error);
       }
@@ -82,8 +77,8 @@ function TransactionListForm() {
   const handleRefresh = (event) => {
     // Prevent the default form submission behavior (page reload)
     event.preventDefault();
-    // You can add code here to send data to a backend server (e.g., using fetch or Axios)
-    alert('Transactions have been refreshed successfully.');
+    // fetch and refresh the transactions
+    console.log('Transactions have been refreshed successfully.');
   };
 
   // Render the form
@@ -104,14 +99,6 @@ function TransactionListForm() {
           </thead>
           <tbody>
           {transactions.map((transaction) => (
-            <tr key={transaction.transactionId}>
-              <td style={{padding: '10px',  textAlign: 'center'}}>{transaction.transactionId}</td>
-              <td style={{padding: '10px',  textAlign: 'left'}}><Link href={`/TransactionView?transactionId=${transaction.transactionId}&purchaseDescription=${transaction.purchaseDescription}&transactionDate=${transaction.transactionDate}&purchaseAmount=${transaction.purchaseAmount}`}>{transaction.purchaseDescription}</Link></td>
-              <td style={{padding: '10px',  textAlign: 'center'}}>{transaction.transactionDate}</td>
-              <td style={{padding: '10px',  textAlign: 'center'}}>{currencyFormatter.format(transaction.purchaseAmount)}</td>
-            </tr>
-          ))}
-          {transactions2.map((transaction) => (
             <tr key={transaction.transactionId}>
               <td style={{padding: '10px',  textAlign: 'center'}}>{transaction.transactionId}</td>
               <td style={{padding: '10px',  textAlign: 'left'}}><Link href={`/TransactionView?transactionId=${transaction.transactionId}&purchaseDescription=${transaction.purchaseDescription}&transactionDate=${transaction.transactionDate}&purchaseAmount=${transaction.purchaseAmount}`}>{transaction.purchaseDescription}</Link></td>

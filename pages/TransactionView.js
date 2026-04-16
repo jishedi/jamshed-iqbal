@@ -43,10 +43,13 @@ function PurchaseTransactionViewForm() {
     const fetchData = async () => {
       const baseUrl = new URL('https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/od/rates_of_exchange');
       const params = new URLSearchParams();
-      const exchangeRateRangeDate = addDaysToDate(new Date(`${transactionDate}`), -180);
+      const exchangeRateRangeStartDate = addDaysToDate(new Date(`${transactionDate}`), -180);
 
+      console.log('Exchange Rate Range Start Date: ' + exchangeRateRangeStartDate);
+      console.log('Exchange Rate Range End Date: ' + transactionDate);
       params.append('fields', 'record_date,country,currency,country_currency_desc,exchange_rate');
-      params.append('filter', 'country:eq:Euro Zone,record_date:gte:' + `${exchangeRateRangeDate}`);
+      params.append('filter', 'country:eq:Euro Zone,record_date:gte:' + `${exchangeRateRangeStartDate}` +
+                    ',record_date:lte:' + `${transactionDate}`);
       params.append('sort', '-record_date');
 
       const queryString = new URLSearchParams(params).toString();
@@ -57,15 +60,18 @@ function PurchaseTransactionViewForm() {
 
         const data = await response.json();
         console.log(data);
-        alert('Country: ' + data.data[0].country + '\nCurrency: ' + data.data[0].currency +
-            '\nExchange Rate: ' + data.data[0].exchange_rate + '\nExchange Rate Range Date: ' +
-            exchangeRateRangeDate + '\nPurchase Amount: ' + currencyFormatter.format(purchaseAmount));
         setCountry(data.data[0].country);
         setCurrency(data.data[0].currency);
         setExchangeRate(data.data[0].exchange_rate);
+        const dateFormatter = new Intl.DateTimeFormat('en-US');
         const recordDate = new Date(data.data[0].record_date);
+        const intlRecordDate = dateFormatter.format(recordDate);
+        console.log('Record Date: ' + data.data[0].record_date);
+        console.log('Converted Record Date: ' + recordDate);
+        console.log('Intl Record Date: ' + intlRecordDate);
         const formattedRecordDate = recordDate.toLocaleDateString('en-US');
         setExchangeRateDate(formattedRecordDate);
+        console.log('Formatted Exchange Rate Date: ' + formattedRecordDate);
         const formattedAmount = new Intl.NumberFormat('en-US').format(purchaseAmount * data.data[0].exchange_rate);
         setConvertedAmount(formattedAmount);
         } catch (error) {
