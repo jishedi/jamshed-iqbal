@@ -3,27 +3,34 @@ import Link from 'next/link';
 import Button from '../components/Button';
 import styles from '../styles/home.module.css';
 
-function addDaysToDate(currentDate, daysToAdd) {
-    daysToAdd = daysToAdd || 0
-
-    // Instantiate a new object based on the current Date
-    const futureDate = new Date(currentDate)
-
-    // Adding the number of days
-    futureDate.setDate(futureDate.getDate() + daysToAdd)
-
-    return futureDate.toISOString().split('T')[0];
-}
-
 function TransactionListForm() {
   const [transactions, setTransactions] = useState([]);
 
-//  for (const transaction of transactions) {
-//    console.log('Transaction ID: ' + transaction.transactionId);
-//    console.log('Purchase Description: ' + transaction.purchaseDescription);
-//    console.log('Transaction Date: ' + transaction.transactionDate);
-//    console.log('Purchase Amount:' + transaction.purchaseAmount);
-//  }
+  const fetchTransactions = async () => {
+    const baseUrl = new URL('http://localhost:8080/api/transactions');
+    const params = new URLSearchParams();
+
+    params.append('days', '1000');
+
+    const queryString = new URLSearchParams(params).toString();
+
+    try {
+      const response = await fetch(`${baseUrl}?${queryString}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const jsonData = await response.json();
+      console.log(jsonData);
+      setTransactions(jsonData);
+      for (const transaction of transactions) {
+        console.log('Transaction ID: ' + transaction.transactionId);
+        console.log('Purchase Description: ' + transaction.purchaseDescription);
+        console.log('Transaction Date: ' + transaction.transactionDate);
+        console.log('Purchase Amount: ' + transaction.purchaseAmount);
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+    }
+  };
 
   const currencyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -36,7 +43,7 @@ function TransactionListForm() {
       const baseUrl = new URL('http://localhost:8080/api/transactions');
       const params = new URLSearchParams();
 
-      params.append('days', '60');
+      params.append('days', '1000');
 
       const queryString = new URLSearchParams(params).toString();
 
@@ -78,7 +85,9 @@ function TransactionListForm() {
     // Prevent the default form submission behavior (page reload)
     event.preventDefault();
     // fetch and refresh the transactions
-    console.log('Transactions have been refreshed successfully.');
+    console.log('Refreshing transactions...');
+    fetchTransactions();
+    console.log('Transactions refreshed successfully...');
   };
 
   // Render the form
@@ -101,7 +110,7 @@ function TransactionListForm() {
           {transactions.map((transaction) => (
             <tr key={transaction.transactionId}>
               <td style={{padding: '10px',  textAlign: 'center'}}>{transaction.transactionId}</td>
-              <td style={{padding: '10px',  textAlign: 'left'}}><Link href={`/TransactionView?transactionId=${transaction.transactionId}&purchaseDescription=${transaction.purchaseDescription}&transactionDate=${transaction.transactionDate}&purchaseAmount=${transaction.purchaseAmount}`}>{transaction.purchaseDescription}</Link></td>
+              <td style={{padding: '10px',  textAlign: 'left'}}><Link href={`/TransactionView?transactionId=${transaction.transactionId}`}>{transaction.purchaseDescription}</Link></td>
               <td style={{padding: '10px',  textAlign: 'center'}}>{transaction.transactionDate}</td>
               <td style={{padding: '10px',  textAlign: 'center'}}>{currencyFormatter.format(transaction.purchaseAmount)}</td>
             </tr>

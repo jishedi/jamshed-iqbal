@@ -35,11 +35,12 @@ function PurchaseTransactionEditForm() {
   const handleSubmit = (event) => {
     // Prevent the default form submission behavior (page reload)
     event.preventDefault();
-    console.log('Submitted name:', name);    // Log the form data or send it to an API
+    // Save the transaction data
+    console.log('Saving the transaction data...');
     console.log('Submitted data: ' + purchaseDescription + ' ' + transactionDate + ' ' + purchaseAmount);
-    // You can add code here to send data to a backend server (e.g., using fetch or Axios)
-    alert(`Purchase transaction data submitted successfully.`);
-    event.target = history.back();
+    event.action = 'POST';
+    event.target = 'http://localhost:8080/api/transactions';
+    window.document.forms[0].submit();
   };
 
   // Render the form
